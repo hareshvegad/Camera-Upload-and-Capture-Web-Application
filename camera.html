@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Meta tags for character set and viewport -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Upload and Capture Web Application</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+
+<body>
+    <!-- Input group for username and upload button -->
+    <div class="container mt-5">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username"
+                aria-describedby="basic-addon2">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="openCameraModal()">Upload</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Display saved photo and file name -->
+    <div class="container mt-2">
+        <label id="savedPhotoContainer" class="d-flex align-items-center"></label>
+    </div>
+
+    <!-- Modal for Camera -->
+    <div class="modal fade" id="cameraModal" tabindex="-1" aria-labelledby="cameraModalLabel" aria-hidden="true"
+        data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cameraModalLabel">Camera</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        onclick="closeCameraModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <video id="cameraFeed" width="100%" height="auto" autoplay playsinline></video>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-primary" onclick="capturePhoto()">Capture Photo</button>
+                    <button type="button" class="btn btn-success" onclick="savePhoto()">Save Photo</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeCameraModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and Bootstrap JavaScript -->    
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+        integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
+        crossorigin="anonymous"></script>
+
+    <!-- JavaScript for camera functionality -->
+    <script>
+        let videoElement = document.getElementById('cameraFeed');
+        let canvas = document.createElement('canvas');
+        let context = canvas.getContext('2d');
+        let capturedImage; // Variable to store the captured image
+        let stream;
+
+        // Function to open the camera modal
+        function openCameraModal() {
+            // Reset the saved photo container
+            const savedPhotoContainer = document.getElementById('savedPhotoContainer');
+            savedPhotoContainer.innerHTML = '';
+        
+            // Show the camera modal
+            $('#cameraModal').modal('show');
+        
+            // Access the user's camera
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function (stream) {
+                    videoElement.srcObject = stream;
+                    videoElement.play(); // Start playing the video
+                    // Save the stream reference
+                    window.stream = stream;
+                })
+                .catch(function (error) {
+                    console.error('Error accessing camera:', error);
+                });
+        }
+
+        // Function to capture a photo from the video feed
+        function capturePhoto() {
+            // Check if videoElement is defined
+            if (videoElement) {
+                // Pause the video stream to capture a frame
+                videoElement.pause();
+        
+                // Clear the previous photo preview
+                const savedPhotoContainer = document.getElementById('savedPhotoContainer');
+                savedPhotoContainer.innerHTML = '';
+        
+                // Capture a frame and display it in the modal body
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                capturedImage = canvas.toDataURL(); // Save the captured image data
+        
+                // Set specific dimensions for the preview image
+                const previewWidth = 471; // Adjust this value as needed
+                const previewHeight = (canvas.height / canvas.width) * previewWidth;
+        
+                $('#cameraModal .modal-body').html('<img src="' + capturedImage + '" width="' + previewWidth + '" height="' + previewHeight + '">');
+            } else {
+                console.error('Video element not found');
+            }
+        }
+
+        // Function to save the captured photo
+        function savePhoto() {
+            return new Promise((resolve, reject) => {
+                // Check if an image is captured
+                if (capturedImage) {
+                    // Create a link element to trigger the download
+                    var link = document.createElement('a');
+                    link.href = capturedImage;
+                    link.download = 'captured_photo.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    // Display saved photo and file name
+                    const savedPhotoContainer = document.getElementById('savedPhotoContainer');
+                    savedPhotoContainer.innerHTML = '<img src="' + capturedImage + '" width="30" height="30">' +
+                        '<p> captured_photo.png</p>';
+
+                    // Reset capturedImage variable
+                    capturedImage = null;
+
+                    // Resolve the promise after saving the photo
+                    resolve();
+                } else {
+                    reject('No photo to save'); // Reject the promise
+                }
+            });
+        }
+
+        // Function to close the camera modal and stop the video stream
+        function closeCameraModal() {
+            // Stop the video stream when closing the modal
+            if (window.stream) {
+                let tracks = window.stream.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+        }
+    </script>
+</body>
+
+</html>
