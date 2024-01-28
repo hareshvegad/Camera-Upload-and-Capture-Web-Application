@@ -4,22 +4,22 @@ This web application provides a simple interface for users to upload images or c
 
 ## Features
 
-### 1. Upload Input Field:
+1. Upload Input Field:
         The application provides an input field for users to enter a recipient's username.
 
-### 2. Upload Button:
+2. Upload Button:
         There is an "Upload" button that triggers the opening of a camera modal when clicked.
 
-### 3. Camera Modal:
+3. Camera Modal:
         The camera modal allows users to access their device's camera.
         It includes a live video feed from the camera using the navigator.mediaDevices.getUserMedia API.
         Users can capture a photo from the live feed by clicking the "Capture Photo" button.
 
-### 4. Save Photo Button:
+4. Save Photo Button:
         After capturing a photo, users can click the "Save Photo" button to download and save the captured image as 'captured_photo.png'.
         The saved photo and file name are displayed below the input field.
 
-### 5. Close Button:
+5. Close Button:
         The modal can be closed using the "Close" button, and it stops the video stream.
 
 ## Usage
