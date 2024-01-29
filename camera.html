@@ -41,17 +41,18 @@
                 </div>
                 <div class="modal-body">
                     <video id="cameraFeed" width="100%" height="auto" autoplay playsinline></video>
+                    <div class="container mt-2" id="previewContainer">
+                    </div>
                 </div>
                 <div class="modal-footer justify-content-between">
                     <button type="button" class="btn btn-primary" onclick="capturePhoto()">Capture Photo</button>
                     <button type="button" class="btn btn-success" onclick="savePhoto()">Save Photo</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeCameraModal()">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- jQuery and Bootstrap JavaScript -->    
+    <!-- jQuery and Bootstrap JavaScript -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
         integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
@@ -73,10 +74,10 @@
             // Reset the saved photo container
             const savedPhotoContainer = document.getElementById('savedPhotoContainer');
             savedPhotoContainer.innerHTML = '';
-        
+
             // Show the camera modal
             $('#cameraModal').modal('show');
-        
+
             // Access the user's camera
             navigator.mediaDevices.getUserMedia({ video: true })
                 .then(function (stream) {
@@ -96,22 +97,21 @@
             if (videoElement) {
                 // Pause the video stream to capture a frame
                 videoElement.pause();
-        
+
                 // Clear the previous photo preview
                 const savedPhotoContainer = document.getElementById('savedPhotoContainer');
                 savedPhotoContainer.innerHTML = '';
-        
+
                 // Capture a frame and display it in the modal body
                 canvas.width = videoElement.videoWidth;
                 canvas.height = videoElement.videoHeight;
                 context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
                 capturedImage = canvas.toDataURL(); // Save the captured image data
-        
+
                 // Set specific dimensions for the preview image
                 const previewWidth = 471; // Adjust this value as needed
                 const previewHeight = (canvas.height / canvas.width) * previewWidth;
-        
-                $('#cameraModal .modal-body').html('<img src="' + capturedImage + '" width="' + previewWidth + '" height="' + previewHeight + '">');
+
             } else {
                 console.error('Video element not found');
             }
